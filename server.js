@@ -39,7 +39,7 @@ const upload = multer({
 });
 
 // Upload endpoint
-app.post('/api/upload', upload.single('image'), (req, res) => {
+app.post('/api/upload', upload.single('file'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -51,8 +51,10 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
     
     res.json({
       success: true,
-      url: dataUrl,
-      type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+      file: {
+        url: dataUrl,
+        type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -60,7 +62,7 @@ app.post('/api/upload', upload.single('image'), (req, res) => {
 });
 
 // Upload endpoint (alternative route)
-app.post('/upload', upload.single('image'), (req, res) => {
+app.post('/upload', upload.single('file'), (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -71,8 +73,10 @@ app.post('/upload', upload.single('image'), (req, res) => {
     
     res.json({
       success: true,
-      url: dataUrl,
-      type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+      file: {
+        url: dataUrl,
+        type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+      }
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
