@@ -13,8 +13,10 @@ const PORT = 3001;
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:8080', 'https://goldenphotography.in', 'https://*.vercel.app'],
-  credentials: true
+  origin: ['http://localhost:8080', 'https://goldenphotography.in', 'https://goldenphotography.vercel.app', 'https://goldenbackend-six.vercel.app'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 app.use(express.json());
 
@@ -55,7 +57,9 @@ const upload = multer({
 });
 
 // Upload endpoint
-app.post('/api/upload', upload.single('file'), (req, res) => {
+app.post('/api/upload', upload.single('image'), (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No file uploaded' });
@@ -65,12 +69,31 @@ app.post('/api/upload', upload.single('file'), (req, res) => {
     
     res.json({
       success: true,
-      message: 'File uploaded successfully',
-      file: {
-        filename: req.file.filename,
-        url: fileUrl,
-        type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
-      }
+      url: fileUrl,
+      filename: req.file.filename,
+      type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Upload endpoint (alternative route)
+app.post('/upload', upload.single('image'), (req, res) => {
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No file uploaded' });
+    }
+
+    const fileUrl = `${req.protocol}://${req.get('host')}/uploads/${req.file.filename}`;
+    
+    res.json({
+      success: true,
+      url: fileUrl,
+      filename: req.file.filename,
+      type: req.file.mimetype.startsWith('video') ? 'video' : 'image'
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
